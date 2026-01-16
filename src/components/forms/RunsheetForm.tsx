@@ -67,12 +67,18 @@ export function RunsheetForm() {
       if (!user) throw new Error("Not authenticated");
       if (!formData.loadType) throw new Error("Load type is required");
       
+      // Validate break duration
+      const breakDuration = formData.breakDuration ? parseInt(formData.breakDuration, 10) : 0;
+      if (isNaN(breakDuration) || breakDuration < 0 || breakDuration > 480) {
+        throw new Error("Break duration must be between 0 and 480 minutes");
+      }
+      
       const { error } = await supabase.from("logs").insert({
         user_id: user.id,
         date: formData.date,
         start_time: formData.startTime,
         finish_time: formData.finishTime || null,
-        break_duration: formData.breakDuration ? parseInt(formData.breakDuration) : 0,
+        break_duration: breakDuration,
         asset_id: formData.assetId || null,
         client_id: formData.clientId || null,
         pickup_address: formData.pickupAddress,
@@ -164,6 +170,9 @@ export function RunsheetForm() {
                 id="breakDuration"
                 type="number"
                 placeholder="30"
+                min="0"
+                max="480"
+                step="1"
                 value={formData.breakDuration}
                 onChange={(e) => updateField("breakDuration", e.target.value)}
               />
