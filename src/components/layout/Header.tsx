@@ -1,8 +1,9 @@
-import { Truck, Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import tfsLogo from "@/assets/tfs-logo.png";
 
 const navItems = [
   { name: "Dashboard", href: "/" },
@@ -25,9 +26,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card shadow-card">
       <div className="container flex h-16 items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-primary">
-            <Truck className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src={tfsLogo} alt="TFS Demolition" className="h-12 w-12 object-contain" />
           <div className="flex flex-col">
             <span className="text-lg font-bold leading-tight text-foreground">TFS Demolition</span>
             <span className="text-xs text-muted-foreground">Driver Runsheets</span>
