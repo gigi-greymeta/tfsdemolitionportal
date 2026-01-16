@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Truck, Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import tfsLogo from "@/assets/tfs-logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -89,14 +90,12 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-elevated animate-slide-up">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-primary">
-              <Truck className="h-7 w-7 text-primary-foreground" />
-            </div>
+            <img src={tfsLogo} alt="TFS Demolition" className="h-16 w-16 object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold">TFS Demolition</CardTitle>
           <CardDescription>Driver Runsheet Management System</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Login</TabsTrigger>
