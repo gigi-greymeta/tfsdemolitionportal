@@ -128,44 +128,47 @@ export function RunsheetForm() {
 
   return (
     <Card className="shadow-card animate-slide-up">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold">New Runsheet Entry</CardTitle>
+      <CardHeader className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+        <CardTitle className="text-lg sm:text-xl font-bold">New Runsheet Entry</CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <CardContent className="px-3 sm:px-6 pb-4 sm:pb-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Date and Time Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="date" className="text-sm">Date</Label>
               <Input
                 id="date"
                 type="date"
                 value={formData.date}
                 onChange={(e) => updateField("date", e.target.value)}
                 required
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="startTime">Start Time</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="startTime" className="text-sm">Start Time</Label>
               <Input
                 id="startTime"
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => updateField("startTime", e.target.value)}
                 required
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="finishTime">Finish Time</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="finishTime" className="text-sm">Finish Time</Label>
               <Input
                 id="finishTime"
                 type="time"
                 value={formData.finishTime}
                 onChange={(e) => updateField("finishTime", e.target.value)}
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="breakDuration">Break Duration (mins)</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="breakDuration" className="text-sm">Break (mins)</Label>
               <Input
                 id="breakDuration"
                 type="number"
@@ -175,36 +178,37 @@ export function RunsheetForm() {
                 step="1"
                 value={formData.breakDuration}
                 onChange={(e) => updateField("breakDuration", e.target.value)}
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
           </div>
 
           {/* Asset and Client Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="asset">Asset</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="asset" className="text-sm">Asset</Label>
               <Select value={formData.assetId} onValueChange={(v) => updateField("assetId", v)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                   <SelectValue placeholder="Select asset" />
                 </SelectTrigger>
                 <SelectContent>
                   {assets?.map((asset) => (
-                    <SelectItem key={asset.id} value={asset.id}>
+                    <SelectItem key={asset.id} value={asset.id} className="text-base sm:text-sm py-2.5 sm:py-1.5">
                       {asset.name} {asset.registration_number && `(${asset.registration_number})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="client">Client</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="client" className="text-sm">Client</Label>
               <Select value={formData.clientId} onValueChange={(v) => updateField("clientId", v)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm">
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
                   {clients?.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
+                    <SelectItem key={client.id} value={client.id} className="text-base sm:text-sm py-2.5 sm:py-1.5">
                       {client.name}
                     </SelectItem>
                   ))}
@@ -214,66 +218,67 @@ export function RunsheetForm() {
           </div>
 
           {/* Addresses Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="pickupAddress">Pick Up Address</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="pickupAddress" className="text-sm">Pick Up Address</Label>
               <Input
                 id="pickupAddress"
                 placeholder="Enter pick up location"
                 value={formData.pickupAddress}
                 onChange={(e) => updateField("pickupAddress", e.target.value)}
                 required
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="dropoffAddress">Drop Off Address</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="dropoffAddress" className="text-sm">Drop Off Address</Label>
               <Input
                 id="dropoffAddress"
                 placeholder="Enter drop off location"
                 value={formData.dropoffAddress}
                 onChange={(e) => updateField("dropoffAddress", e.target.value)}
                 required
+                className="h-11 sm:h-10 text-base sm:text-sm"
               />
             </div>
           </div>
 
-          {/* Load Type and Job Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="loadType">Load Type / Material</Label>
-              <Select value={formData.loadType} onValueChange={(v) => updateField("loadType", v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select load type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Load Type */}
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="loadType" className="text-sm">Load Type / Material</Label>
+            <Select value={formData.loadType} onValueChange={(v) => updateField("loadType", v)}>
+              <SelectTrigger className="h-11 sm:h-10 text-base sm:text-sm w-full sm:w-1/2">
+                <SelectValue placeholder="Select load type" />
+              </SelectTrigger>
+              <SelectContent>
+                {loadTypes.map((type) => (
+                  <SelectItem key={type} value={type} className="text-base sm:text-sm py-2.5 sm:py-1.5">
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="jobDetails">Job Details</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="jobDetails" className="text-sm">Job Details</Label>
             <Textarea
               id="jobDetails"
               placeholder="Enter any additional job details or notes..."
               value={formData.jobDetails}
               onChange={(e) => updateField("jobDetails", e.target.value)}
               rows={3}
+              className="text-base sm:text-sm"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 sm:pt-6">
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleSaveDraft} 
-              className="flex-1 sm:flex-none"
+              className="flex-1 h-12 sm:h-11 text-base sm:text-sm touch-target"
               disabled={submitMutation.isPending}
             >
               {submitMutation.isPending ? (
@@ -283,7 +288,11 @@ export function RunsheetForm() {
               )}
               Save In Progress
             </Button>
-            <Button type="submit" className="flex-1 sm:flex-none" disabled={submitMutation.isPending}>
+            <Button 
+              type="submit" 
+              className="flex-1 h-12 sm:h-11 text-base sm:text-sm touch-target" 
+              disabled={submitMutation.isPending}
+            >
               {submitMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

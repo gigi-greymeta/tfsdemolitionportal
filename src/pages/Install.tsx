@@ -52,11 +52,11 @@ const Install = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container py-8">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold">Install TFS Runsheets</h1>
-            <p className="text-muted-foreground">
+      <main className="container py-4 sm:py-8 px-3 sm:px-4 safe-area-bottom">
+        <div className="max-w-2xl mx-auto space-y-4 sm:space-y-6">
+          <div className="text-center space-y-1.5 sm:space-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">Install TFS Runsheets</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Install this app on your device for quick access and offline use
             </p>
           </div>
@@ -79,17 +79,17 @@ const Install = () => {
             <>
               {deferredPrompt && (
                 <Card className="border-primary/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                       <Chrome className="h-5 w-5" />
                       Install Now
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Click the button below to install the app directly
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <Button onClick={handleInstall} size="lg" className="w-full">
+                  <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                    <Button onClick={handleInstall} size="lg" className="w-full h-12 sm:h-11 text-base touch-target">
                       <Download className="h-4 w-4 mr-2" />
                       Install App
                     </Button>
@@ -99,17 +99,17 @@ const Install = () => {
 
               {isIOS && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                  <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4">
+                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                       <Apple className="h-5 w-5" />
                       Install on iPhone/iPad
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-sm">
                       Follow these steps to add to your home screen
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <ol className="list-decimal list-inside space-y-3 text-sm">
+                  <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+                    <ol className="list-decimal list-inside space-y-2.5 sm:space-y-3 text-sm">
                       <li>Tap the <strong>Share</strong> button in Safari (the square with an arrow)</li>
                       <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
                       <li>Tap <strong>"Add"</strong> in the top right corner</li>
@@ -118,15 +118,15 @@ const Install = () => {
                 </Card>
               )}
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
+                  <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Smartphone className="h-5 w-5" />
                       Mobile
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
+                  <CardContent className="text-sm text-muted-foreground px-4 sm:px-6 pb-4 sm:pb-6">
                     <p>
                       On Android, use Chrome's menu (⋮) and tap "Install app" or "Add to Home screen".
                     </p>
@@ -134,13 +134,13 @@ const Install = () => {
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
+                  <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 sm:pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                       <Monitor className="h-5 w-5" />
                       Desktop
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
+                  <CardContent className="text-sm text-muted-foreground px-4 sm:px-6 pb-4 sm:pb-6">
                     <p>
                       In Chrome or Edge, click the install icon in the address bar, or use the browser menu.
                     </p>

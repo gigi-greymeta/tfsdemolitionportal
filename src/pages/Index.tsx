@@ -101,19 +101,19 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-6 space-y-6">
+      <main className="container py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 safe-area-bottom">
         {/* Welcome Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
               Dashboard
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
               Welcome back! Here's your overview for today.
             </p>
           </div>
-          <Link to="/new-entry">
-            <Button size="lg" className="w-full sm:w-auto">
+          <Link to="/new-entry" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full sm:w-auto h-12 sm:h-11 text-base touch-target">
               <Plus className="h-5 w-5" />
               New Entry
             </Button>
@@ -121,11 +121,11 @@ const Index = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {statsLoading ? (
             <>
               {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className="h-32 rounded-lg" />
+                <Skeleton key={i} className="h-24 sm:h-32 rounded-lg" />
               ))}
             </>
           ) : (

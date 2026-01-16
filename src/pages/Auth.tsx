@@ -90,26 +90,26 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4 safe-area-top safe-area-bottom">
       <Card className="w-full max-w-md shadow-elevated animate-slide-up">
-        <CardHeader className="text-center pb-2">
-          <div className="flex justify-center mb-4">
-            <img src={tfsLogo} alt="TFS Demolition" className="h-16 w-16 object-contain" />
+        <CardHeader className="text-center pb-2 px-4 sm:px-6 pt-4 sm:pt-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <img src={tfsLogo} alt="TFS Demolition" className="h-14 w-14 sm:h-16 sm:w-16 object-contain" />
           </div>
-          <CardTitle className="text-2xl font-bold">TFS Demolition</CardTitle>
-          <CardDescription>Driver Runsheet Management System</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold">TFS Demolition</CardTitle>
+          <CardDescription className="text-sm">Driver Runsheet Management System</CardDescription>
         </CardHeader>
-        <CardContent className="relative">
+        <CardContent className="relative px-4 sm:px-6 pb-4 sm:pb-6">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-11 sm:h-10">
+              <TabsTrigger value="login" className="text-base sm:text-sm">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="text-base sm:text-sm">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
+              <form onSubmit={handleLogin} className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="login-email" className="text-sm">Email</Label>
                   <Input
                     id="login-email"
                     type="email"
@@ -117,10 +117,11 @@ const Auth = () => {
                     value={loginData.email}
                     onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                     required
+                    className="h-11 sm:h-10 text-base sm:text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="login-password" className="text-sm">Password</Label>
                   <Input
                     id="login-password"
                     type="password"
@@ -128,9 +129,10 @@ const Auth = () => {
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                     required
+                    className="h-11 sm:h-10 text-base sm:text-sm"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full h-11 sm:h-10 text-base sm:text-sm touch-target" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -143,7 +145,7 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
+                  className="w-full py-2 text-sm text-muted-foreground hover:text-primary active:text-primary transition-colors touch-target"
                 >
                   Forgot your password?
                 </button>
@@ -151,9 +153,9 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+              <form onSubmit={handleSignup} className="space-y-3 sm:space-y-4">
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="signup-name" className="text-sm">Full Name</Label>
                   <Input
                     id="signup-name"
                     type="text"
@@ -161,10 +163,11 @@ const Auth = () => {
                     value={signupData.fullName}
                     onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
                     required
+                    className="h-11 sm:h-10 text-base sm:text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="signup-email" className="text-sm">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -172,10 +175,11 @@ const Auth = () => {
                     value={signupData.email}
                     onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                     required
+                    className="h-11 sm:h-10 text-base sm:text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="signup-password" className="text-sm">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -184,9 +188,10 @@ const Auth = () => {
                     onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                     required
                     minLength={6}
+                    className="h-11 sm:h-10 text-base sm:text-sm"
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full h-11 sm:h-10 text-base sm:text-sm touch-target" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />

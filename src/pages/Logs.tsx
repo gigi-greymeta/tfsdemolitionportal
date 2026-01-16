@@ -85,39 +85,39 @@ const Logs = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container py-6 space-y-6">
+      <main className="container py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 safe-area-bottom">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
             Runsheet Logs
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
             View and manage all your runsheet entries
           </p>
         </div>
 
         {/* Filters */}
         <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by client, docket number, or asset..."
+                  placeholder="Search client, docket, asset..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-11 sm:h-10 text-base sm:text-sm"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-full sm:w-48 h-11 sm:h-10 text-base sm:text-sm">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="all" className="text-base sm:text-sm">All Status</SelectItem>
+                  <SelectItem value="completed" className="text-base sm:text-sm">Completed</SelectItem>
+                  <SelectItem value="in-progress" className="text-base sm:text-sm">In Progress</SelectItem>
+                  <SelectItem value="pending" className="text-base sm:text-sm">Pending</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -132,70 +132,72 @@ const Logs = () => {
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredLogs.map((log) => (
-              <Card key={log.id} className="shadow-card hover:shadow-elevated transition-shadow animate-fade-in">
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-primary" />
-                          <span className="font-mono text-sm font-semibold text-primary">
-                            {log.dockets?.[0]?.docket_number || "No Docket"}
-                          </span>
-                        </div>
-                        <Badge variant="outline" className={statusStyles[log.status as keyof typeof statusStyles] || statusStyles.pending}>
-                          {log.status}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {log.date}
+              <Card key={log.id} className="shadow-card hover:shadow-elevated active:shadow-elevated transition-shadow animate-fade-in">
+                <CardContent className="p-3 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:gap-4">
+                    {/* Header row */}
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                        <span className="font-mono text-xs sm:text-sm font-semibold text-primary">
+                          {log.dockets?.[0]?.docket_number || "No Docket"}
                         </span>
                       </div>
-
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {log.clients?.name || "No Client"}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Package className="h-4 w-4" />
-                          {log.assets?.name || "No Asset"} • {log.load_type}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
-                        <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-success" />
-                          <span><strong>Pick up:</strong> {log.pickup_address}</span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-destructive" />
-                          <span><strong>Drop off:</strong> {log.dropoff_address}</span>
-                        </div>
-                      </div>
-
-                      {log.job_details && (
-                        <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                          {log.job_details}
-                        </p>
-                      )}
+                      <Badge variant="outline" className={`text-[10px] sm:text-xs px-1.5 sm:px-2 ${statusStyles[log.status as keyof typeof statusStyles] || statusStyles.pending}`}>
+                        {log.status}
+                      </Badge>
+                      <span className="text-xs sm:text-sm text-muted-foreground ml-auto">
+                        {log.date}
+                      </span>
                     </div>
 
-                    <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 lg:text-right lg:min-w-[120px]">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="h-4 w-4 text-muted-foreground lg:order-2" />
+                    {/* Client and asset */}
+                    <div className="space-y-1">
+                      <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                        {log.clients?.name || "No Client"}
+                      </h3>
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        {log.assets?.name || "No Asset"} • {log.load_type}
+                      </div>
+                    </div>
+
+                    {/* Addresses */}
+                    <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-muted-foreground">
+                      <div className="flex items-start gap-1.5 sm:gap-2">
+                        <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0 text-success" />
+                        <span className="line-clamp-2"><strong>Pick up:</strong> {log.pickup_address}</span>
+                      </div>
+                      <div className="flex items-start gap-1.5 sm:gap-2">
+                        <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0 text-destructive" />
+                        <span className="line-clamp-2"><strong>Drop off:</strong> {log.dropoff_address}</span>
+                      </div>
+                    </div>
+
+                    {log.job_details && (
+                      <p className="text-xs sm:text-sm text-muted-foreground bg-muted/50 p-2 sm:p-3 rounded-lg line-clamp-3">
+                        {log.job_details}
+                      </p>
+                    )}
+
+                    {/* Time info */}
+                    <div className="flex items-center justify-between pt-2 border-t border-border">
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                        <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                         <span className="font-medium">
                           {log.start_time} - {log.finish_time || "Now"}
                         </span>
+                        {(log.break_duration || 0) > 0 && (
+                          <span className="text-muted-foreground">
+                            ({log.break_duration}m break)
+                          </span>
+                        )}
                       </div>
-                      <div className="text-lg font-bold text-foreground">
+                      <div className="text-base sm:text-lg font-bold text-foreground">
                         {calculateHours(log.start_time, log.finish_time, log.break_duration)}
                       </div>
-                      {(log.break_duration || 0) > 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          ({log.break_duration}m break)
-                        </span>
-                      )}
                     </div>
                   </div>
                 </CardContent>
