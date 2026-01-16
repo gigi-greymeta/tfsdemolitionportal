@@ -1,7 +1,8 @@
-import { Truck, Menu, X } from "lucide-react";
+import { Truck, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { name: "Dashboard", href: "/" },
@@ -12,6 +13,13 @@ const navItems = [
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card shadow-card">
@@ -41,6 +49,12 @@ export function Header() {
               {item.name}
             </Link>
           ))}
+          {user && (
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="ml-2">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -72,6 +86,12 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            {user && (
+              <Button variant="ghost" onClick={handleSignOut} className="justify-start px-4">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            )}
           </div>
         </nav>
       )}

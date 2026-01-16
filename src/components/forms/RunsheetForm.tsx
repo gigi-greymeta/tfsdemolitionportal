@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,37 +10,110 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Send } from "lucide-react";
+import { Save, Send, Loader2 } from "lucide-react";
+import { Tables, Constants } from "@/integrations/supabase/types";
 
-const mockClients = ["ABC Construction", "XYZ Builders", "Metro Demolition", "City Council"];
-const mockAssets = ["Truck 001", "Truck 002", "Truck 003", "Excavator 001"];
-const loadTypes = ["Concrete", "Steel", "Mixed Waste", "Bricks", "Timber", "Asbestos", "Green Waste", "Soil"];
+type Client = Tables<"clients">;
+type Asset = Tables<"assets">;
+type LoadType = typeof Constants.public.Enums.load_type[number];
+
+const loadTypes = Constants.public.Enums.load_type;
 
 export function RunsheetForm() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     startTime: "",
     finishTime: "",
     breakDuration: "",
-    asset: "",
-    client: "",
+    assetId: "",
+    clientId: "",
     pickupAddress: "",
     dropoffAddress: "",
     jobDetails: "",
-    loadType: "",
+    loadType: "" as LoadType | "",
+  });
+
+  const { data: clients } = useQuery({
+    queryKey: ["clients"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data as Client[];
+    },
+  });
+
+  const { data: assets } = useQuery({
+    queryKey: ["assets"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("assets")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Asset[];
+    },
+  });
+
+  const submitMutation = useMutation({
+    mutationFn: async (status: "in-progress" | "completed") => {
+      if (!user) throw new Error("Not authenticated");
+      if (!formData.loadType) throw new Error("Load type is required");
+      
+      const { error } = await supabase.from("logs").insert({
+        user_id: user.id,
+        date: formData.date,
+        start_time: formData.startTime,
+        finish_time: formData.finishTime || null,
+        break_duration: formData.breakDuration ? parseInt(formData.breakDuration) : 0,
+        asset_id: formData.assetId || null,
+        client_id: formData.clientId || null,
+        pickup_address: formData.pickupAddress,
+        dropoff_address: formData.dropoffAddress,
+        load_type: formData.loadType as LoadType,
+        job_details: formData.jobDetails || null,
+        status,
+      });
+      
+      if (error) throw error;
+    },
+    onSuccess: (_, status) => {
+      queryClient.invalidateQueries({ queryKey: ["logs"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-logs"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      
+      if (status === "completed") {
+        toast.success("Runsheet entry submitted!", {
+          description: "A docket has been created for this entry.",
+        });
+      } else {
+        toast.success("Entry saved as in-progress", {
+          description: "You can complete it later.",
+        });
+      }
+      navigate("/");
+    },
+    onError: (error) => {
+      toast.error("Failed to save entry", {
+        description: error.message,
+      });
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Runsheet entry submitted successfully!", {
-      description: "A docket has been created for this entry.",
-    });
+    submitMutation.mutate("completed");
   };
 
   const handleSaveDraft = () => {
-    toast.info("Draft saved", {
-      description: "Your entry has been saved as a draft.",
-    });
+    submitMutation.mutate("in-progress");
   };
 
   const updateField = (field: string, value: string) => {
@@ -97,14 +174,14 @@ export function RunsheetForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="asset">Asset</Label>
-              <Select value={formData.asset} onValueChange={(v) => updateField("asset", v)}>
+              <Select value={formData.assetId} onValueChange={(v) => updateField("assetId", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select asset" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockAssets.map((asset) => (
-                    <SelectItem key={asset} value={asset}>
-                      {asset}
+                  {assets?.map((asset) => (
+                    <SelectItem key={asset.id} value={asset.id}>
+                      {asset.name} {asset.registration_number && `(${asset.registration_number})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -112,14 +189,14 @@ export function RunsheetForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="client">Client</Label>
-              <Select value={formData.client} onValueChange={(v) => updateField("client", v)}>
+              <Select value={formData.clientId} onValueChange={(v) => updateField("clientId", v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockClients.map((client) => (
-                    <SelectItem key={client} value={client}>
-                      {client}
+                  {clients?.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -183,13 +260,27 @@ export function RunsheetForm() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={handleSaveDraft} className="flex-1 sm:flex-none">
-              <Save className="h-4 w-4" />
-              Save Draft
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleSaveDraft} 
+              className="flex-1 sm:flex-none"
+              disabled={submitMutation.isPending}
+            >
+              {submitMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save In Progress
             </Button>
-            <Button type="submit" className="flex-1 sm:flex-none">
-              <Send className="h-4 w-4" />
-              Submit Entry
+            <Button type="submit" className="flex-1 sm:flex-none" disabled={submitMutation.isPending}>
+              {submitMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              Submit Completed
             </Button>
           </div>
         </form>
