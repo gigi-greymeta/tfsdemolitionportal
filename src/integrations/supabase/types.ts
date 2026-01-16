@@ -290,6 +290,7 @@ export type Database = {
     }
     Functions: {
       generate_docket_number: { Args: never; Returns: string }
+      has_management_access: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -298,9 +299,11 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_contractor: { Args: never; Returns: boolean }
+      is_manager: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "driver" | "admin"
+      app_role: "driver" | "admin" | "manager" | "contractor"
       load_type:
         | "Concrete"
         | "Steel"
@@ -438,7 +441,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["driver", "admin"],
+      app_role: ["driver", "admin", "manager", "contractor"],
       load_type: [
         "Concrete",
         "Steel",
