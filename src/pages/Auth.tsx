@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
 import tfsLogo from "@/assets/tfs-logo.png";
+import { getAuthErrorMessage } from "@/lib/auth-utils";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -30,9 +31,12 @@ const Auth = () => {
     });
     
     if (error) {
-      toast.error("Password reset failed", {
-        description: error.message,
+      // For password reset, always show success to prevent email enumeration
+      toast.success("Check your email", {
+        description: "If an account exists with that email, you will receive a reset link.",
       });
+      setShowForgotPassword(false);
+      setResetEmail("");
     } else {
       toast.success("Check your email", {
         description: "We've sent you a password reset link.",
@@ -51,7 +55,7 @@ const Auth = () => {
     
     if (error) {
       toast.error("Login failed", {
-        description: error.message,
+        description: getAuthErrorMessage(error),
       });
     } else {
       toast.success("Welcome back!");
@@ -74,7 +78,7 @@ const Auth = () => {
     
     if (error) {
       toast.error("Signup failed", {
-        description: error.message,
+        description: getAuthErrorMessage(error),
       });
     } else {
       toast.success("Account created successfully!", {
