@@ -19,7 +19,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename={"/tfsapp"}>
+        <BrowserRouter {basename="/tfsapp"}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/new-entry" element={<NewEntry />} />
