@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NewEntry from "./pages/NewEntry";
 import Logs from "./pages/Logs";
 import Auth from "./pages/Auth";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/new-entry" element={<NewEntry />} />
             <Route path="/logs" element={<Logs />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
