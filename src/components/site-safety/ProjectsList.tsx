@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Users, FileText, CheckCircle2, Clock } from "lucide-react";
+import { MapPin, Users, FileText, CheckCircle2, Clock, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog";
+import { QuickProjectDialog } from "./QuickProjectDialog";
 
 interface Project {
   id: string;
@@ -133,6 +134,9 @@ export function ProjectsList() {
 
   return (
     <>
+      <div className="flex justify-end mb-4">
+        <QuickProjectDialog />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {projects.map((project) => {
           const enrollment = getEnrollmentStatus(project.id);
