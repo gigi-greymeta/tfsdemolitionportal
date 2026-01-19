@@ -1,21 +1,44 @@
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import tfsLogo from "@/assets/tfs-logo.png";
 
-const navItems = [
-  { name: "Dashboard", href: "/" },
-  { name: "New Entry", href: "/new-entry" },
-  { name: "Logs", href: "/logs" },
-];
+const getNavItems = (pathname: string) => {
+  // Show context-aware navigation based on current section
+  if (pathname.startsWith("/site-safety")) {
+    return [
+      { name: "Portal", href: "/" },
+      { name: "Site Safety", href: "/site-safety" },
+    ];
+  }
+  if (pathname.startsWith("/my-employment")) {
+    return [
+      { name: "Portal", href: "/" },
+      { name: "My Employment", href: "/my-employment" },
+    ];
+  }
+  if (pathname.startsWith("/runsheets") || pathname.startsWith("/new-entry") || pathname.startsWith("/logs")) {
+    return [
+      { name: "Portal", href: "/" },
+      { name: "Run Sheets", href: "/runsheets" },
+      { name: "New Entry", href: "/new-entry" },
+      { name: "Logs", href: "/logs" },
+    ];
+  }
+  return [
+    { name: "Portal", href: "/" },
+  ];
+};
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  const navItems = getNavItems(location.pathname);
 
   const handleSignOut = async () => {
     await signOut();
@@ -29,7 +52,7 @@ export function Header() {
           <img src={tfsLogo} alt="TFS Demolition" className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-bold leading-tight text-foreground">TFS Demolition</span>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">Driver Runsheets</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Driver Portal</span>
           </div>
         </Link>
 

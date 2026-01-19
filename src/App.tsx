@@ -4,7 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Index from "./pages/Index";
+import Portal from "./pages/Portal";
+import Runsheets from "./pages/Runsheets";
+import SiteSafety from "./pages/SiteSafety";
+import MyEmployment from "./pages/MyEmployment";
 import NewEntry from "./pages/NewEntry";
 import Logs from "./pages/Logs";
 import Auth from "./pages/Auth";
@@ -21,7 +24,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Portal />} />
+            <Route path="/runsheets" element={<Runsheets />} />
+            <Route path="/site-safety" element={<SiteSafety />} />
+            <Route path="/my-employment" element={<MyEmployment />} />
             <Route path="/new-entry" element={<NewEntry />} />
             <Route path="/logs" element={<Logs />} />
             <Route path="/auth" element={<Auth />} />

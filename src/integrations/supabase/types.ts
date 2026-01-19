@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          related_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assets: {
         Row: {
           asset_type: string | null
@@ -112,6 +145,38 @@ export type Database = {
             columns: ["log_id"]
             isOneToOne: false
             referencedRelation: "logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          signature_data: string | null
+          signed_at: string
+          user_id: string
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          signature_data?: string | null
+          signed_at?: string
+          user_id: string
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          signature_data?: string | null
+          signed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "site_documents"
             referencedColumns: ["id"]
           },
         ]
@@ -263,6 +328,187 @@ export type Database = {
         }
         Relationships: []
       }
+      project_enrollments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          asset_id: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          project_id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_id?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          project_id: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          asset_id?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_enrollments_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_enrollments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          address: string | null
+          client_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          qr_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          qr_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          qr_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_url: string | null
+          id: string
+          is_active: boolean
+          project_id: string
+          requires_signature: boolean
+          title: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          project_id: string
+          requires_signature?: boolean
+          title: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_type?: Database["public"]["Enums"]["document_type"]
+          file_url?: string | null
+          id?: string
+          is_active?: boolean
+          project_id?: string
+          requires_signature?: boolean
+          title?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_records: {
+        Row: {
+          certificate_url: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_mandatory: boolean
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certificate_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_mandatory?: boolean
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certificate_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_mandatory?: boolean
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -304,6 +550,15 @@ export type Database = {
     }
     Enums: {
       app_role: "driver" | "admin" | "manager" | "contractor"
+      document_type:
+        | "SWMS"
+        | "JSEA"
+        | "Site Safety Plan"
+        | "Demolition Plan"
+        | "Induction Checklist"
+        | "Training Certificate"
+        | "Other"
+      enrollment_status: "pending" | "approved" | "rejected"
       load_type:
         | "Concrete"
         | "Steel"
@@ -442,6 +697,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["driver", "admin", "manager", "contractor"],
+      document_type: [
+        "SWMS",
+        "JSEA",
+        "Site Safety Plan",
+        "Demolition Plan",
+        "Induction Checklist",
+        "Training Certificate",
+        "Other",
+      ],
+      enrollment_status: ["pending", "approved", "rejected"],
       load_type: [
         "Concrete",
         "Steel",
