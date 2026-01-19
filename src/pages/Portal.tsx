@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Briefcase, ClipboardList } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 const Portal = () => {
   const { user, loading: authLoading } = useAuth();
@@ -79,6 +80,8 @@ const Portal = () => {
           </div>
         </div>
       </main>
+      
+      <InstallPrompt />
     </div>
   );
 };
