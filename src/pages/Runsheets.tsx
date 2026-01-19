@@ -5,11 +5,11 @@ import { Header } from "@/components/layout/Header";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentLogs } from "@/components/dashboard/RecentLogs";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Clock, Truck, Users, Plus } from "lucide-react";
+import { ClipboardList, Clock, Truck, Users, Plus, ArrowLeft } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Index = () => {
+const Runsheets = () => {
   const { user, loading: authLoading } = useAuth();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -104,13 +104,20 @@ const Index = () => {
       <main className="container py-4 sm:py-6 px-3 sm:px-4 space-y-4 sm:space-y-6 safe-area-bottom">
         {/* Welcome Section */}
         <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
-              Dashboard
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
-              Welcome back! Here's your overview for today.
-            </p>
+          <div className="flex items-center gap-3">
+            <Link to="/">
+              <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+                Run Sheets
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
+                Manage your daily runsheets and logs
+              </p>
+            </div>
           </div>
           <Link to="/new-entry" className="w-full sm:w-auto">
             <Button size="lg" className="w-full sm:w-auto h-12 sm:h-11 text-base touch-target">
@@ -165,4 +172,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Runsheets;
