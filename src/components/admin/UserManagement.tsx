@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -25,7 +25,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { SearchInput } from "@/components/ui/search-input";
 import { InviteUserDialog } from "./InviteUserDialog";
+import { CreateUserDialog } from "./CreateUserDialog";
 import { EditUserDialog } from "./EditUserDialog";
 import { UserPasswordDialog } from "./UserPasswordDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -41,6 +43,7 @@ const ROLE_COLORS: Record<AppRole, string> = {
 
 export function UserManagement() {
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
   const { data: users, isLoading } = useQuery({
@@ -70,6 +73,19 @@ export function UserManagement() {
       })) || [];
     },
   });
+
+  // Filter users based on search
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    if (!searchQuery.trim()) return users;
+    
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => 
+      user.full_name?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query) ||
+      user.role?.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
@@ -134,17 +150,25 @@ export function UserManagement() {
             Manage users, roles, and access permissions
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <UserPasswordDialog />
+          <CreateUserDialog />
           <InviteUserDialog />
         </div>
       </div>
+
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search by name, email, or role..."
+        className="max-w-md"
+      />
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">All Users</CardTitle>
           <CardDescription>
-            {users?.length || 0} users in the system
+            {filteredUsers.length} of {users?.length || 0} users
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -159,7 +183,7 @@ export function UserManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
+                {filteredUsers.map((user) => (
                   <TableRow key={user.user_id}>
                     <TableCell className="font-medium">{user.full_name}</TableCell>
                     <TableCell className="text-muted-foreground">{user.email || "—"}</TableCell>
@@ -219,10 +243,10 @@ export function UserManagement() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {(!users || users.length === 0) && (
+                {filteredUsers.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      No users found
+                      {searchQuery ? "No users match your search" : "No users found"}
                     </TableCell>
                   </TableRow>
                 )}

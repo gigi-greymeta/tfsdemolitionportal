@@ -21,13 +21,13 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
     setLoading(true);
 
     try {
-      let signOns: Array<{ signed_at: string; user_name: string }> = [];
+      let signOns: Array<{ signed_at: string; user_name: string; signature_data?: string | null }> = [];
 
       if (type === "project") {
-        // Fetch project sign-ons
+        // Fetch project sign-ons with signature data
         const { data: signOnData, error: signOnError } = await supabase
           .from("project_signons")
-          .select("signed_at, user_id")
+          .select("signed_at, user_id, signature_data")
           .eq("project_id", id)
           .order("signed_at", { ascending: false });
 
@@ -47,12 +47,13 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
         signOns = (signOnData || []).map((record) => ({
           signed_at: record.signed_at,
           user_name: profileMap.get(record.user_id) || "Unknown User",
+          signature_data: record.signature_data,
         }));
       } else {
-        // Fetch document signatures
+        // Fetch document signatures with signature data
         const { data: sigData, error: sigError } = await supabase
           .from("document_signatures")
-          .select("signed_at, user_id")
+          .select("signed_at, user_id, signature_data")
           .eq("document_id", id)
           .order("signed_at", { ascending: false });
 
@@ -72,6 +73,7 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
         signOns = (sigData || []).map((record) => ({
           signed_at: record.signed_at,
           user_name: profileMap.get(record.user_id) || "Unknown User",
+          signature_data: record.signature_data,
         }));
       }
 
@@ -107,15 +109,19 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
 
       // Table header
       const tableStartX = 20;
-      const colWidths = [90, 80];
+      const colWidths = [60, 70, 60];
+      const hasSignatures = signOns.some(s => s.signature_data);
       
       doc.setFillColor(240, 240, 240);
-      doc.rect(tableStartX, yPos - 5, colWidths[0] + colWidths[1], 10, "F");
+      doc.rect(tableStartX, yPos - 5, colWidths[0] + colWidths[1] + colWidths[2], 10, "F");
       
       doc.setFontSize(11);
       doc.setFont("helvetica", "bold");
       doc.text("Name", tableStartX + 5, yPos);
       doc.text("Date & Time", tableStartX + colWidths[0] + 5, yPos);
+      if (hasSignatures) {
+        doc.text("Signature", tableStartX + colWidths[0] + colWidths[1] + 5, yPos);
+      }
       yPos += 10;
 
       // Table rows
@@ -127,8 +133,10 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
         doc.text("No sign-ons recorded", pageWidth / 2, yPos, { align: "center" });
       } else {
         for (const record of signOns) {
+          const rowHeight = record.signature_data ? 25 : 10;
+          
           // Check if we need a new page
-          if (yPos > 270) {
+          if (yPos + rowHeight > 270) {
             doc.addPage();
             yPos = 20;
           }
@@ -136,7 +144,7 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
           // Alternate row background
           if (signOns.indexOf(record) % 2 === 0) {
             doc.setFillColor(250, 250, 250);
-            doc.rect(tableStartX, yPos - 5, colWidths[0] + colWidths[1], 8, "F");
+            doc.rect(tableStartX, yPos - 5, colWidths[0] + colWidths[1] + colWidths[2], rowHeight, "F");
           }
 
           doc.setTextColor(0);
@@ -146,7 +154,24 @@ export function SignOnReportDownload({ type, id, name, projectNumber }: SignOnRe
             tableStartX + colWidths[0] + 5,
             yPos
           );
-          yPos += 8;
+
+          // Add signature image if available
+          if (record.signature_data && record.signature_data.startsWith("data:image")) {
+            try {
+              doc.addImage(
+                record.signature_data,
+                "PNG",
+                tableStartX + colWidths[0] + colWidths[1] + 5,
+                yPos - 8,
+                50,
+                20
+              );
+            } catch (e) {
+              console.error("Failed to add signature image:", e);
+            }
+          }
+
+          yPos += rowHeight;
         }
       }
 
