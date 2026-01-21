@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, FolderPlus } from "lucide-react";
+import { Plus, FolderPlus, Building2, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddProjectDialogProps {
@@ -33,6 +33,8 @@ export function AddProjectDialog({ trigger }: AddProjectDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [showAddClient, setShowAddClient] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
 
   const [formData, setFormData] = useState({
     projectNumber: "",
@@ -41,7 +43,21 @@ export function AddProjectDialog({ trigger }: AddProjectDialogProps) {
     clientId: "",
   });
 
-  const { data: clients } = useQuery({
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .in("role", ["admin", "manager"]);
+      return (data?.length ?? 0) > 0;
+    },
+    enabled: !!user,
+  });
+
+  const { data: clients, refetch: refetchClients } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -52,6 +68,35 @@ export function AddProjectDialog({ trigger }: AddProjectDialogProps) {
       return data;
     },
     enabled: open,
+  });
+
+  const createClientMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const { data, error } = await supabase
+        .from("clients")
+        .insert({ name })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      refetchClients();
+      setFormData({ ...formData, clientId: data.id });
+      setNewClientName("");
+      setShowAddClient(false);
+      toast({
+        title: "Client Created",
+        description: `${data.name} has been added.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to Create Client",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const createProjectMutation = useMutation({
@@ -124,6 +169,12 @@ export function AddProjectDialog({ trigger }: AddProjectDialogProps) {
   });
 
   const isValid = formData.projectNumber.trim() && formData.name.trim();
+
+  const handleAddClient = () => {
+    if (newClientName.trim()) {
+      createClientMutation.mutate(newClientName.trim());
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -213,6 +264,55 @@ export function AddProjectDialog({ trigger }: AddProjectDialogProps) {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Add Client - Admin Only */}
+            {isAdmin && !showAddClient && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2 gap-2 w-full"
+                onClick={() => setShowAddClient(true)}
+              >
+                <Building2 className="h-4 w-4" />
+                Add New Client
+              </Button>
+            )}
+
+            {/* Inline Add Client Form */}
+            {isAdmin && showAddClient && (
+              <div className="mt-2 p-3 border rounded-md bg-muted/50 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">New Client</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => {
+                      setShowAddClient(false);
+                      setNewClientName("");
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Input
+                  placeholder="Enter client name"
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  className="w-full"
+                  onClick={handleAddClient}
+                  disabled={!newClientName.trim() || createClientMutation.isPending}
+                >
+                  {createClientMutation.isPending ? "Adding..." : "Add Client"}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
