@@ -336,6 +336,42 @@ export type Database = {
           },
         ]
       }
+      payslips: {
+        Row: {
+          created_at: string
+          file_url: string
+          id: string
+          pay_period_end: string
+          pay_period_start: string
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          id?: string
+          pay_period_end: string
+          pay_period_start: string
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          id?: string
+          pay_period_end?: string
+          pay_period_start?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
