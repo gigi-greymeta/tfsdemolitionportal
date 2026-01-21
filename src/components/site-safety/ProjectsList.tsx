@@ -36,6 +36,20 @@ export function ProjectsList() {
   const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  // Check if user has management access
+  const { data: isAdmin } = useQuery({
+    queryKey: ["has-management-access", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .in("role", ["admin", "manager"]);
+      return (data?.length ?? 0) > 0;
+    },
+    enabled: !!user,
+  });
+
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -138,9 +152,11 @@ export function ProjectsList() {
 
   return (
     <>
-      <div className="flex justify-end mb-4">
-        <AddProjectDialog />
-      </div>
+      {isAdmin && (
+        <div className="flex justify-end mb-4">
+          <AddProjectDialog />
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         {projects.map((project) => {
           const enrollment = getEnrollmentStatus(project.id);
