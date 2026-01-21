@@ -63,7 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Clear local state first, then attempt server signout
+    // This ensures logout works even if the session is stale on the server
+    setUser(null);
+    setSession(null);
+    await supabase.auth.signOut({ scope: 'local' });
   };
 
   return (
