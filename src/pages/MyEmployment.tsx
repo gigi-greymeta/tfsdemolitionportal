@@ -11,7 +11,7 @@ import { Link, Navigate } from "react-router-dom";
 import { PayslipsList } from "@/components/employment/PayslipsList";
 import { PayslipUploadDialog } from "@/components/employment/PayslipUploadDialog";
 import { AdminPayslipsList } from "@/components/employment/AdminPayslipsList";
-
+import { UserManagement } from "@/components/admin/UserManagement";
 const MyEmployment = () => {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("payslips");
@@ -166,17 +166,7 @@ const MyEmployment = () => {
                 </TabsList>
 
                 <TabsContent value="user-management" className="mt-4">
-                  <Card className="border-dashed">
-                    <CardContent className="py-12 text-center">
-                      <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                      <h2 className="text-xl font-semibold text-foreground mb-2">
-                        User Management
-                      </h2>
-                      <p className="text-muted-foreground max-w-md mx-auto">
-                        User management features are coming soon. Manage employee profiles, roles, and permissions here.
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <UserManagement />
                 </TabsContent>
 
                 <TabsContent value="payslips" className="mt-4 space-y-4">
