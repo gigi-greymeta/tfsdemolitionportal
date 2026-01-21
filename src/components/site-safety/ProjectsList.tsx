@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Users, FileText, CheckCircle2, Clock, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog";
-import { QuickProjectDialog } from "./QuickProjectDialog";
+import { AddProjectDialog } from "./AddProjectDialog";
 
 interface Project {
   id: string;
@@ -135,7 +135,7 @@ export function ProjectsList() {
   return (
     <>
       <div className="flex justify-end mb-4">
-        <QuickProjectDialog />
+        <AddProjectDialog />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {projects.map((project) => {
