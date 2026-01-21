@@ -18,6 +18,7 @@ interface Project {
   client_id: string | null;
   is_active: boolean;
   qr_code: string | null;
+  project_number: string | null;
   created_at: string;
   clients?: { name: string } | null;
 }
@@ -43,6 +44,9 @@ export function ProjectsList() {
         .select(`*, clients(name)`)
         .eq("is_active", true)
         .order("name");
+      
+      if (error) throw error;
+      return data as Project[];
       
       if (error) throw error;
       return data as Project[];

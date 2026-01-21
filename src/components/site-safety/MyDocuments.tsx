@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileText, CheckCircle2, Clock, Building2, Eye, PenLine, ExternalLink } from "lucide-react";
 import { SignaturePage } from "./SignaturePage";
+import { DocumentPDFDownload } from "./DocumentPDFDownload";
 
 interface AssignedDocument {
   id: string;
@@ -26,6 +27,7 @@ interface AssignedDocument {
     projects: {
       id: string;
       name: string;
+      project_number: string | null;
     };
   };
 }
@@ -61,7 +63,8 @@ export function MyDocuments() {
             requires_signature,
             projects (
               id,
-              name
+              name,
+              project_number
             )
           )
         `)
@@ -209,6 +212,16 @@ export function MyDocuments() {
           </div>
         </div>
         <div className="flex gap-2 flex-shrink-0">
+          <DocumentPDFDownload
+            documentId={doc.site_documents.id}
+            documentTitle={doc.site_documents.title}
+            documentType={doc.site_documents.document_type}
+            version={doc.site_documents.version}
+            projectName={doc.site_documents.projects?.name || "Unknown"}
+            projectNumber={doc.site_documents.projects?.project_number || null}
+            description={doc.site_documents.description}
+            size="icon"
+          />
           {doc.site_documents.file_url && (
             <Button
               size="sm"
