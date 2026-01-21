@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,15 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { FileText, CheckCircle2, Clock, Building2, Eye, PenLine, ExternalLink, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, CheckCircle2, Clock, Building2, Eye, PenLine, ExternalLink } from "lucide-react";
+import { SignaturePage } from "./SignaturePage";
 
 interface AssignedDocument {
   id: string;
@@ -44,7 +38,6 @@ interface SignedDocument {
 
 export function MyDocuments() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [viewingDoc, setViewingDoc] = useState<AssignedDocument | null>(null);
   const [signingDoc, setSigningDoc] = useState<AssignedDocument | null>(null);
 
@@ -96,27 +89,6 @@ export function MyDocuments() {
     enabled: !!user,
   });
 
-  const signMutation = useMutation({
-    mutationFn: async (documentId: string) => {
-      const { error } = await supabase
-        .from("document_signatures")
-        .insert({
-          document_id: documentId,
-          user_id: user!.id,
-          signature_data: `Signed electronically by ${user!.email} on ${new Date().toISOString()}`,
-        });
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-signatures"] });
-      toast.success("Document signed successfully");
-      setSigningDoc(null);
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to sign document", { description: error.message });
-    },
-  });
 
   const getDocumentTypeColor = (type: string) => {
     const colors: Record<string, string> = {
@@ -381,47 +353,12 @@ export function MyDocuments() {
         </DialogContent>
       </Dialog>
 
-      {/* Sign Document Dialog */}
-      <Dialog open={!!signingDoc} onOpenChange={() => setSigningDoc(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Sign Document</DialogTitle>
-            <DialogDescription>
-              {signingDoc?.site_documents.title}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-muted/50 rounded-lg p-4 text-sm">
-              <p className="font-medium mb-2">Electronic Signature Confirmation</p>
-              <p className="text-muted-foreground">
-                By clicking "Sign Document", you confirm that you have read and understood this
-                document. Your signature will be recorded with your email and timestamp.
-              </p>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={() => setSigningDoc(null)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={() => signingDoc && signMutation.mutate(signingDoc.site_documents.id)}
-                disabled={signMutation.isPending}
-              >
-                {signMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing...
-                  </>
-                ) : (
-                  <>
-                    <PenLine className="h-4 w-4 mr-1" />
-                    Sign Document
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Sign Document - Signature Page */}
+      <SignaturePage
+        open={!!signingDoc}
+        onOpenChange={(open) => !open && setSigningDoc(null)}
+        document={signingDoc?.site_documents || null}
+      />
     </>
   );
 }

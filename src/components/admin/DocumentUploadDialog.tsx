@@ -62,7 +62,7 @@ export function DocumentUploadDialog({ projectId: initialProjectId, trigger }: D
     title: "",
     description: "",
     documentType: "" as DocumentType | "",
-    requiresSignature: false,
+    requiresSignature: true, // Always require signature page
   });
   const [userAssignments, setUserAssignments] = useState<UserAssignment[]>([]);
 
@@ -188,7 +188,7 @@ export function DocumentUploadDialog({ projectId: initialProjectId, trigger }: D
       title: "",
       description: "",
       documentType: "",
-      requiresSignature: false,
+      requiresSignature: true, // Always require signature page
     });
     setUserAssignments([]);
     if (!initialProjectId) setSelectedProjectId("");
@@ -224,7 +224,6 @@ export function DocumentUploadDialog({ projectId: initialProjectId, trigger }: D
     file && formData.title && formData.documentType && selectedProjectId;
 
   const selectedCount = userAssignments.filter((u) => u.selected).length;
-  const selectedProject = projects?.find(p => p.id === selectedProjectId);
 
   return (
     <Dialog
@@ -336,18 +335,15 @@ export function DocumentUploadDialog({ projectId: initialProjectId, trigger }: D
             />
           </div>
 
-          {/* Requires Signature */}
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="requires-signature"
-              checked={formData.requiresSignature}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, requiresSignature: checked === true })
-              }
-            />
-            <Label htmlFor="requires-signature" className="cursor-pointer">
-              This document requires signatures
-            </Label>
+          {/* Signature Page Info */}
+          <div className="bg-muted/50 rounded-lg p-3 text-sm">
+            <p className="font-medium flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Signature Page Included
+            </p>
+            <p className="text-muted-foreground mt-1">
+              All documents include a mandatory signature page that assigned employees must complete.
+            </p>
           </div>
 
           {/* User Assignments */}
