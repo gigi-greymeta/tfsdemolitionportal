@@ -458,6 +458,7 @@ export type Database = {
           created_at: string
           id: string
           project_id: string
+          signature_data: string | null
           signed_at: string
           user_id: string
         }
@@ -465,6 +466,7 @@ export type Database = {
           created_at?: string
           id?: string
           project_id: string
+          signature_data?: string | null
           signed_at?: string
           user_id: string
         }
@@ -472,6 +474,7 @@ export type Database = {
           created_at?: string
           id?: string
           project_id?: string
+          signature_data?: string | null
           signed_at?: string
           user_id?: string
         }

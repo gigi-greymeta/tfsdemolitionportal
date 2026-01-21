@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Users, FileText, CheckCircle2, Clock, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SearchInput } from "@/components/ui/search-input";
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog";
 import { AddProjectDialog } from "./AddProjectDialog";
 import { EditProjectDialog } from "./EditProjectDialog";
@@ -38,6 +39,7 @@ export function ProjectsList() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Check if user has management access
   const { data: isAdmin } = useQuery({
@@ -127,6 +129,19 @@ export function ProjectsList() {
     return enrollments?.find(e => e.project_id === projectId);
   };
 
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    if (!searchQuery.trim()) return projects;
+    
+    const query = searchQuery.toLowerCase();
+    return projects.filter(project => 
+      project.name?.toLowerCase().includes(query) ||
+      project.project_number?.toLowerCase().includes(query) ||
+      project.address?.toLowerCase().includes(query) ||
+      project.clients?.name?.toLowerCase().includes(query)
+    );
+  }, [projects, searchQuery]);
+
   const isLoading = projectsLoading || enrollmentsLoading;
 
   if (isLoading) {
@@ -162,102 +177,121 @@ export function ProjectsList() {
 
   return (
     <>
-      {isAdmin && (
-        <div className="flex justify-end mb-4">
-          <AddProjectDialog />
-        </div>
-      )}
-      <div className="grid gap-4 sm:grid-cols-2">
-        {projects.map((project) => {
-          const enrollment = getEnrollmentStatus(project.id);
-          const isEnrolled = enrollment?.status === "approved";
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search projects..."
+          className="w-full sm:max-w-xs"
+        />
+        {isAdmin && <AddProjectDialog />}
+      </div>
 
-          return (
-            <Card 
-              key={project.id} 
-              className={`transition-all ${isEnrolled ? 'border-success/30 bg-success/5' : ''}`}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-base sm:text-lg truncate">
-                      {project.name}
-                    </CardTitle>
-                    {project.clients?.name && (
-                      <CardDescription className="flex items-center gap-1 mt-1">
-                        <Users className="h-3 w-3 flex-shrink-0" />
-                        <span className="truncate">{project.clients.name}</span>
-                      </CardDescription>
+      {filteredProjects.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">
+              {searchQuery ? "No projects match your search" : "No active projects available"}
+            </p>
+            {isAdmin && !searchQuery && (
+              <p className="text-sm text-muted-foreground mt-2">Click "Add Project" to create your first project</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {filteredProjects.map((project) => {
+            const enrollment = getEnrollmentStatus(project.id);
+            const isEnrolled = enrollment?.status === "approved";
+
+            return (
+              <Card 
+                key={project.id} 
+                className={`transition-all ${isEnrolled ? 'border-success/30 bg-success/5' : ''}`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base sm:text-lg truncate">
+                        {project.name}
+                      </CardTitle>
+                      {project.clients?.name && (
+                        <CardDescription className="flex items-center gap-1 mt-1">
+                          <Users className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{project.clients.name}</span>
+                        </CardDescription>
+                      )}
+                    </div>
+                    {isEnrolled && (
+                      <Badge variant="outline" className="bg-success/10 text-success border-success/30 flex-shrink-0">
+                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        Enrolled
+                      </Badge>
                     )}
                   </div>
-                  {isEnrolled && (
-                    <Badge variant="outline" className="bg-success/10 text-success border-success/30 flex-shrink-0">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Enrolled
-                    </Badge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {project.address && (
+                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <span className="line-clamp-2">{project.address}</span>
+                    </div>
                   )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {project.address && (
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span className="line-clamp-2">{project.address}</span>
-                  </div>
-                )}
 
-                {/* Admin controls */}
-                {isAdmin && (
-                  <div className="flex flex-wrap gap-2 pb-2">
-                    <EditProjectDialog project={project} />
-                    <QRCodeDisplay 
-                      type="project" 
-                      id={project.id} 
-                      name={project.name}
-                    />
-                    <SignOnReportDownload
-                      type="project"
-                      id={project.id}
-                      name={project.name}
-                      projectNumber={project.project_number || undefined}
-                    />
-                  </div>
-                )}
-
-                <div className="flex gap-2">
-                  {isEnrolled ? (
-                    <Button 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => setSelectedProject(project)}
-                    >
-                      <FileText className="h-4 w-4 mr-1" />
-                      View Documents
-                    </Button>
-                  ) : (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => enrollMutation.mutate(project.id)}
-                      disabled={enrollMutation.isPending}
-                    >
-                      {enrollMutation.isPending ? (
-                        <>
-                          <Clock className="h-4 w-4 mr-1 animate-spin" />
-                          Enrolling...
-                        </>
-                      ) : (
-                        "Enrol in Project"
-                      )}
-                    </Button>
+                  {/* Admin controls */}
+                  {isAdmin && (
+                    <div className="flex flex-wrap gap-2 pb-2">
+                      <EditProjectDialog project={project} />
+                      <QRCodeDisplay 
+                        type="project" 
+                        id={project.id} 
+                        name={project.name}
+                      />
+                      <SignOnReportDownload
+                        type="project"
+                        id={project.id}
+                        name={project.name}
+                        projectNumber={project.project_number || undefined}
+                      />
+                    </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+
+                  <div className="flex gap-2">
+                    {isEnrolled ? (
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => setSelectedProject(project)}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        View Documents
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => enrollMutation.mutate(project.id)}
+                        disabled={enrollMutation.isPending}
+                      >
+                        {enrollMutation.isPending ? (
+                          <>
+                            <Clock className="h-4 w-4 mr-1 animate-spin" />
+                            Enrolling...
+                          </>
+                        ) : (
+                          "Enrol in Project"
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       <ProjectDetailsDialog 
         project={selectedProject}

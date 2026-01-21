@@ -1,22 +1,20 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Navigate, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, MapPin, Loader2, AlertCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { ProjectSignaturePage } from "@/components/site-safety/ProjectSignaturePage";
 
 const ProjectSign = () => {
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("project");
   const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [signedOn, setSignedOn] = useState(false);
+  const [showSignature, setShowSignature] = useState(false);
 
   // Fetch project details
   const { data: project, isLoading: projectLoading } = useQuery({
@@ -35,7 +33,7 @@ const ProjectSign = () => {
   });
 
   // Check if already signed on today
-  const { data: todaySignOn, isLoading: signOnLoading } = useQuery({
+  const { data: todaySignOn, isLoading: signOnLoading, refetch: refetchSignOn } = useQuery({
     queryKey: ["today-signon", projectId, user?.id],
     queryFn: async () => {
       const today = new Date();
@@ -55,73 +53,10 @@ const ProjectSign = () => {
     enabled: !!projectId && !!user,
   });
 
-  // Check enrollment status
-  const { data: enrollment } = useQuery({
-    queryKey: ["enrollment", projectId, user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("project_enrollments")
-        .select("*")
-        .eq("project_id", projectId!)
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!projectId && !!user,
-  });
-
-  // Auto-enroll and sign on mutation
-  const signOnMutation = useMutation({
-    mutationFn: async () => {
-      // First, enroll if not already
-      if (!enrollment) {
-        const { error: enrollError } = await supabase
-          .from("project_enrollments")
-          .insert({
-            project_id: projectId!,
-            user_id: user!.id,
-            status: "approved",
-          });
-        
-        if (enrollError && !enrollError.message.includes("duplicate")) {
-          throw enrollError;
-        }
-      }
-
-      // Create sign-on record
-      const { error: signOnError } = await supabase
-        .from("project_signons")
-        .insert({
-          project_id: projectId!,
-          user_id: user!.id,
-        });
-      
-      if (signOnError) throw signOnError;
-    },
-    onSuccess: () => {
-      setSignedOn(true);
-      queryClient.invalidateQueries({ queryKey: ["today-signon"] });
-      queryClient.invalidateQueries({ queryKey: ["enrollment"] });
-      toast({
-        title: "Signed On Successfully",
-        description: `You are now signed onto ${project?.name}`,
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Sign On Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Auto sign-on when page loads (if not already signed on today)
+  // Auto-open signature dialog when page loads (if not already signed today)
   useEffect(() => {
-    if (project && !todaySignOn && !signOnLoading && !signedOn) {
-      signOnMutation.mutate();
+    if (project && !todaySignOn && !signOnLoading) {
+      setShowSignature(true);
     }
   }, [project, todaySignOn, signOnLoading]);
 
@@ -138,7 +73,6 @@ const ProjectSign = () => {
   }
 
   if (!user) {
-    // Store the intended destination and redirect to auth
     sessionStorage.setItem("redirectAfterAuth", `/project-sign?project=${projectId}`);
     return <Navigate to="/auth" replace />;
   }
@@ -172,7 +106,7 @@ const ProjectSign = () => {
     );
   }
 
-  const alreadySignedOn = todaySignOn || signedOn;
+  const alreadySignedOn = !!todaySignOn;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -190,12 +124,7 @@ const ProjectSign = () => {
           )}
         </CardHeader>
         <CardContent className="space-y-6">
-          {signOnMutation.isPending ? (
-            <div className="text-center py-6">
-              <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">Signing you on...</p>
-            </div>
-          ) : alreadySignedOn ? (
+          {alreadySignedOn ? (
             <div className="text-center py-6">
               <div className="h-16 w-16 mx-auto bg-success/20 rounded-full flex items-center justify-center mb-4">
                 <CheckCircle2 className="h-10 w-10 text-success" />
@@ -208,12 +137,15 @@ const ProjectSign = () => {
           ) : (
             <div className="text-center py-6">
               <AlertCircle className="h-12 w-12 mx-auto text-warning mb-4" />
-              <p className="text-lg font-medium">Sign On Failed</p>
+              <p className="text-lg font-medium">Sign On Required</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Please sign on to this project
+              </p>
               <Button 
                 className="mt-4" 
-                onClick={() => signOnMutation.mutate()}
+                onClick={() => setShowSignature(true)}
               >
-                Try Again
+                Sign On Now
               </Button>
             </div>
           )}
@@ -235,6 +167,13 @@ const ProjectSign = () => {
           </div>
         </CardContent>
       </Card>
+
+      <ProjectSignaturePage
+        open={showSignature}
+        onOpenChange={setShowSignature}
+        project={project}
+        onSuccess={() => refetchSignOn()}
+      />
     </div>
   );
 };

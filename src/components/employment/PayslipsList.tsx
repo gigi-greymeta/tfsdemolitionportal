@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,10 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Calendar, Loader2 } from "lucide-react";
+import { SearchInput } from "@/components/ui/search-input";
 import { format } from "date-fns";
 
 export function PayslipsList() {
   const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: payslips, isLoading } = useQuery({
     queryKey: ["my-payslips", user?.id],
@@ -23,6 +26,16 @@ export function PayslipsList() {
     },
     enabled: !!user,
   });
+
+  const filteredPayslips = useMemo(() => {
+    if (!payslips) return [];
+    if (!searchQuery.trim()) return payslips;
+    
+    const query = searchQuery.toLowerCase();
+    return payslips.filter(payslip => 
+      payslip.title?.toLowerCase().includes(query)
+    );
+  }, [payslips, searchQuery]);
 
   const handleDownload = async (fileUrl: string, title: string) => {
     try {
@@ -73,7 +86,29 @@ export function PayslipsList() {
 
   return (
     <div className="space-y-4">
-      {payslips.map((payslip) => (
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search payslips..."
+        className="max-w-md"
+      />
+      
+      {filteredPayslips.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">
+              {searchQuery ? "No Results" : "No Payslips"}
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              {searchQuery 
+                ? "No payslips match your search" 
+                : "You don't have any payslips yet. They will appear here once uploaded by admin."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        filteredPayslips.map((payslip) => (
         <Card key={payslip.id}>
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
@@ -106,7 +141,7 @@ export function PayslipsList() {
             </Button>
           </CardContent>
         </Card>
-      ))}
+      )))}
     </div>
   );
 }
