@@ -425,6 +425,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          project_number: string | null
           qr_code: string | null
           updated_at: string
         }
@@ -435,6 +436,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          project_number?: string | null
           qr_code?: string | null
           updated_at?: string
         }
@@ -445,6 +447,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          project_number?: string | null
           qr_code?: string | null
           updated_at?: string
         }
