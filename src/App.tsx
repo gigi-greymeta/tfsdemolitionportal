@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+
 import Portal from "./pages/Portal";
 import Runsheets from "./pages/Runsheets";
 import SiteSafety from "./pages/SiteSafety";
@@ -24,7 +25,9 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename="/tfsapp">
+
+        {/* IMPORTANT: match Vite base ("/tfsapp/") */}
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route path="/" element={<Portal />} />
             <Route path="/runsheets" element={<Runsheets />} />
