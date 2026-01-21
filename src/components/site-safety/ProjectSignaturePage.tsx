@@ -42,14 +42,25 @@ export function ProjectSignaturePage({ open, onOpenChange, project, onSuccess }:
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
 
-  // Initialize canvas when dialog opens
+  // Initialize and resize canvas when dialog opens
   useEffect(() => {
-    if (open && canvasRef.current) {
+    if (open && canvasRef.current && containerRef.current) {
       const canvas = canvasRef.current;
+      const container = containerRef.current;
+      
+      // Set canvas size based on container width
+      const containerWidth = container.clientWidth;
+      const canvasWidth = Math.min(containerWidth, 400);
+      const canvasHeight = 120;
+      
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.fillStyle = "#ffffff";
@@ -128,13 +139,9 @@ export function ProjectSignaturePage({ open, onOpenChange, project, onSuccess }:
     setHasSignature(false);
   };
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
+  const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
     let clientX: number, clientY: number;
@@ -147,8 +154,27 @@ export function ProjectSignaturePage({ open, onOpenChange, project, onSuccess }:
       clientY = e.clientY;
     }
 
+    // Scale coordinates to match canvas internal dimensions
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    };
+  };
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const { x, y } = getCanvasCoordinates(e);
     ctx.beginPath();
-    ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    ctx.moveTo(x, y);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -160,22 +186,15 @@ export function ProjectSignaturePage({ open, onOpenChange, project, onSuccess }:
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    let clientX: number, clientY: number;
-
     if ("touches" in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
       e.preventDefault();
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
     }
 
+    const { x, y } = getCanvasCoordinates(e);
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#000000";
-    ctx.lineTo(clientX - rect.left, clientY - rect.top);
+    ctx.lineTo(x, y);
     ctx.stroke();
     setHasSignature(true);
   };
@@ -288,12 +307,14 @@ export function ProjectSignaturePage({ open, onOpenChange, project, onSuccess }:
                 Clear
               </Button>
             </div>
-            <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden bg-white">
+            <div 
+              ref={containerRef}
+              className="border-2 border-dashed border-muted-foreground/30 rounded-lg overflow-hidden bg-white"
+            >
               <canvas
                 ref={canvasRef}
-                width={400}
-                height={150}
-                className="w-full touch-none cursor-crosshair"
+                className="w-full h-[120px] touch-none cursor-crosshair"
+                style={{ touchAction: "none" }}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}

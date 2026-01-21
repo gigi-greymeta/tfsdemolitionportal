@@ -76,7 +76,7 @@ export const InstallPrompt = () => {
   }
 
   return (
-    <Card className="fixed bottom-20 left-3 right-3 z-50 border-primary/50 shadow-elevated animate-in slide-in-from-bottom-4 duration-300 sm:left-auto sm:right-4 sm:max-w-sm">
+    <Card className="fixed bottom-4 left-3 right-3 z-50 border-primary/50 shadow-elevated animate-in slide-in-from-bottom-4 duration-300 sm:left-auto sm:right-4 sm:max-w-sm safe-area-bottom">
       <CardContent className="p-4">
         <button
           onClick={handleDismiss}
@@ -105,16 +105,17 @@ export const InstallPrompt = () => {
                 <Share className="h-4 w-4 flex-shrink-0" />
                 <span>Tap Share, then "Add to Home Screen"</span>
               </div>
-            ) : deferredPrompt ? (
+            ) : (
               <Button 
                 onClick={handleInstall} 
                 size="sm" 
                 className="mt-3 w-full h-9 touch-target"
+                disabled={!deferredPrompt}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Install App
               </Button>
-            ) : null}
+            )}
           </div>
         </div>
       </CardContent>
