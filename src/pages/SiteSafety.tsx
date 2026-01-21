@@ -5,13 +5,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Header } from "@/components/layout/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ArrowLeft, Upload } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { ProjectsList } from "@/components/site-safety/ProjectsList";
@@ -22,7 +15,6 @@ import { DocumentUploadDialog } from "@/components/admin/DocumentUploadDialog";
 const SiteSafety = () => {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("projects");
-  const [selectedProjectId, setSelectedProjectId] = useState("");
 
   // Check if user is admin/manager
   const { data: isAdmin } = useQuery({
@@ -36,21 +28,6 @@ const SiteSafety = () => {
       return (data?.length ?? 0) > 0;
     },
     enabled: !!user,
-  });
-
-  // Fetch projects for admin document upload
-  const { data: projects } = useQuery({
-    queryKey: ["projects-for-upload"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("projects")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!isAdmin,
   });
 
   if (authLoading) {
@@ -90,29 +67,14 @@ const SiteSafety = () => {
 
           {/* Admin Controls */}
           {isAdmin && (
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Select project" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <DocumentUploadDialog
-                projectId={selectedProjectId}
-                trigger={
-                  <Button disabled={!selectedProjectId} className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload Document
-                  </Button>
-                }
-              />
-            </div>
+            <DocumentUploadDialog
+              trigger={
+                <Button className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload Document
+                </Button>
+              }
+            />
           )}
         </div>
 
