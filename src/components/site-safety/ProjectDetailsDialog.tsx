@@ -16,7 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, CheckCircle2, Truck, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentPDFDownload } from "./DocumentPDFDownload";
-
+import { QRCodeDisplay } from "./QRCodeDisplay";
+import { SignOnReportDownload } from "./SignOnReportDownload";
 interface Project {
   id: string;
   name: string;
@@ -188,6 +189,20 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
     return colors[type] || "bg-muted text-muted-foreground";
   };
 
+  // Check if user has management access
+  const { data: isAdmin } = useQuery({
+    queryKey: ["has-management-access", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .in("role", ["admin", "manager"]);
+      return (data?.length ?? 0) > 0;
+    },
+    enabled: !!user,
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
@@ -199,6 +214,25 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
+          {/* Admin Controls - QR Codes and Reports */}
+          {isAdmin && project && (
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+              <div className="text-sm font-medium text-primary">Admin Controls</div>
+              <div className="flex flex-wrap gap-2">
+                <QRCodeDisplay 
+                  type="project" 
+                  id={project.id} 
+                  name={project.name} 
+                />
+                <SignOnReportDownload
+                  type="project"
+                  id={project.id}
+                  name={project.name}
+                  projectNumber={project.project_number || undefined}
+                />
+              </div>
+            </div>
+          )}
           {/* Asset Selection */}
           <div className="p-3 bg-muted/50 rounded-lg space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -271,6 +305,20 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
                         </div>
                         
                         <div className="flex items-center gap-2 flex-shrink-0">
+                          {isAdmin && (
+                            <>
+                              <QRCodeDisplay 
+                                type="document" 
+                                id={doc.id} 
+                                name={doc.title}
+                              />
+                              <SignOnReportDownload
+                                type="document"
+                                id={doc.id}
+                                name={doc.title}
+                              />
+                            </>
+                          )}
                           <DocumentPDFDownload
                             documentId={doc.id}
                             documentTitle={doc.title}

@@ -13,6 +13,7 @@ import Logs from "./pages/Logs";
 import Auth from "./pages/Auth";
 import Install from "./pages/Install";
 import DocumentSign from "./pages/DocumentSign";
+import ProjectSign from "./pages/ProjectSign";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/install" element={<Install />} />
             <Route path="/document-sign" element={<DocumentSign />} />
+            <Route path="/project-sign" element={<ProjectSign />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
