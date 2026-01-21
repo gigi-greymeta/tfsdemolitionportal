@@ -101,13 +101,12 @@ export function EditProjectDialog({ project, trigger }: EditProjectDialogProps) 
         .select(`
           id,
           user_id,
-          status,
-          profiles!inner(user_id, full_name, email)
+          status
         `)
         .eq("project_id", project.id);
       
       if (error) throw error;
-      return data as unknown as Enrollment[];
+      return data;
     },
     enabled: open,
   });
@@ -125,6 +124,15 @@ export function EditProjectDialog({ project, trigger }: EditProjectDialogProps) 
     },
     enabled: open,
   });
+
+  // Combine enrollments with profile data
+  const enrolledUsers = enrollments?.map(enrollment => {
+    const profile = allUsers?.find(u => u.user_id === enrollment.user_id);
+    return {
+      ...enrollment,
+      profiles: profile || { user_id: enrollment.user_id, full_name: "Unknown User", email: null }
+    };
+  }) || [];
 
   // Get users not enrolled
   const unenrolledUsers = allUsers?.filter(
@@ -346,19 +354,19 @@ export function EditProjectDialog({ project, trigger }: EditProjectDialogProps) 
             <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
               {/* Enrolled Users */}
               <div className="flex-1 overflow-hidden flex flex-col">
-                <Label className="mb-2">Enrolled Users ({enrollments?.length || 0})</Label>
-                <ScrollArea className="flex-1 border rounded-md">
+                <Label className="mb-2">Enrolled Users ({enrolledUsers.length})</Label>
+                <ScrollArea className="flex-1 border rounded-md max-h-40">
                   <div className="p-2 space-y-1">
                     {enrollmentsLoading ? (
                       <div className="text-center py-4 text-muted-foreground">
                         <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                       </div>
-                    ) : !enrollments?.length ? (
+                    ) : !enrolledUsers.length ? (
                       <div className="text-center py-4 text-muted-foreground text-sm">
                         No users enrolled yet
                       </div>
                     ) : (
-                      enrollments.map((enrollment) => (
+                      enrolledUsers.map((enrollment) => (
                         <div
                           key={enrollment.id}
                           className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50"
@@ -390,7 +398,7 @@ export function EditProjectDialog({ project, trigger }: EditProjectDialogProps) 
               {/* Add Users */}
               <div className="flex-1 overflow-hidden flex flex-col">
                 <Label className="mb-2">Add Users ({unenrolledUsers.length} available)</Label>
-                <ScrollArea className="flex-1 border rounded-md">
+                <ScrollArea className="flex-1 border rounded-md max-h-40">
                   <div className="p-2 space-y-1">
                     {!unenrolledUsers.length ? (
                       <div className="text-center py-4 text-muted-foreground text-sm">
