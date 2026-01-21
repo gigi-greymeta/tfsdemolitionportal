@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Briefcase, ClipboardList } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { MobilePWAButton } from "@/components/pwa/MobilePWAButton";
 
 const Portal = () => {
   const { user, loading: authLoading } = useAuth();
@@ -82,6 +83,7 @@ const Portal = () => {
       </main>
       
       <InstallPrompt />
+      <MobilePWAButton />
     </div>
   );
 };
