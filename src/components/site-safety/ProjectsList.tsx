@@ -61,9 +61,6 @@ export function ProjectsList() {
       
       if (error) throw error;
       return data as Project[];
-      
-      if (error) throw error;
-      return data as Project[];
     },
   });
 
@@ -141,12 +138,22 @@ export function ProjectsList() {
 
   if (!projects?.length) {
     return (
-      <Card>
-        <CardContent className="py-10 text-center">
-          <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">No active projects available</p>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        {isAdmin && (
+          <div className="flex justify-end">
+            <AddProjectDialog />
+          </div>
+        )}
+        <Card>
+          <CardContent className="py-10 text-center">
+            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No active projects available</p>
+            {isAdmin && (
+              <p className="text-sm text-muted-foreground mt-2">Click "Add Project" to create your first project</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
