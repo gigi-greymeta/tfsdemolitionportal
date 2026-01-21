@@ -10,6 +10,7 @@ import { MapPin, Users, FileText, CheckCircle2, Clock, Plus } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { ProjectDetailsDialog } from "./ProjectDetailsDialog";
 import { AddProjectDialog } from "./AddProjectDialog";
+import { EditProjectDialog } from "./EditProjectDialog";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import { SignOnReportDownload } from "./SignOnReportDownload";
 
@@ -208,6 +209,7 @@ export function ProjectsList() {
                 {/* Admin controls */}
                 {isAdmin && (
                   <div className="flex flex-wrap gap-2 pb-2">
+                    <EditProjectDialog project={project} />
                     <QRCodeDisplay 
                       type="project" 
                       id={project.id} 
