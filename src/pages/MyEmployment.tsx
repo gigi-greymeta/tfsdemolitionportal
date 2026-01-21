@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Clock, GraduationCap, Construction, DollarSign, Upload } from "lucide-react";
+import { ArrowLeft, FileText, Clock, GraduationCap, Construction, DollarSign, Shield, Users } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { PayslipsList } from "@/components/employment/PayslipsList";
 import { PayslipUploadDialog } from "@/components/employment/PayslipUploadDialog";
@@ -15,6 +15,7 @@ import { AdminPayslipsList } from "@/components/employment/AdminPayslipsList";
 const MyEmployment = () => {
   const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState("payslips");
+  const [adminSubTab, setAdminSubTab] = useState("user-management");
 
   // Check if user is admin/manager
   const { data: isAdmin } = useQuery({
@@ -85,23 +86,11 @@ const MyEmployment = () => {
               </p>
             </div>
           </div>
-
-          {/* Admin Upload Button */}
-          {isAdmin && activeTab === "payslips" && (
-            <PayslipUploadDialog
-              trigger={
-                <Button className="gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload Payslip
-                </Button>
-              }
-            />
-          )}
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 h-11 sm:h-10">
+          <TabsList className={`grid w-full h-11 sm:h-10 ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
             <TabsTrigger value="payslips" className="text-xs sm:text-sm gap-2">
               <DollarSign className="h-4 w-4" />
               Payslips
@@ -110,6 +99,12 @@ const MyEmployment = () => {
               <Construction className="h-4 w-4" />
               Coming Soon
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="admin" className="text-xs sm:text-sm gap-2">
+                <Shield className="h-4 w-4" />
+                Admin Control
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="payslips" className="mt-4 space-y-6">
@@ -118,13 +113,6 @@ const MyEmployment = () => {
               <h2 className="text-lg font-semibold mb-4">My Payslips</h2>
               <PayslipsList />
             </div>
-
-            {/* Admin: All Payslips */}
-            {isAdmin && (
-              <div>
-                <AdminPayslipsList />
-              </div>
-            )}
           </TabsContent>
 
           <TabsContent value="more" className="mt-4">
@@ -161,6 +149,45 @@ const MyEmployment = () => {
               ))}
             </div>
           </TabsContent>
+
+          {/* Admin Control Tab */}
+          {isAdmin && (
+            <TabsContent value="admin" className="mt-4 space-y-4">
+              <Tabs value={adminSubTab} onValueChange={setAdminSubTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-10">
+                  <TabsTrigger value="user-management" className="text-xs sm:text-sm gap-2">
+                    <Users className="h-4 w-4" />
+                    User Management
+                  </TabsTrigger>
+                  <TabsTrigger value="payslips" className="text-xs sm:text-sm gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Payslips
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="user-management" className="mt-4">
+                  <Card className="border-dashed">
+                    <CardContent className="py-12 text-center">
+                      <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                      <h2 className="text-xl font-semibold text-foreground mb-2">
+                        User Management
+                      </h2>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        User management features are coming soon. Manage employee profiles, roles, and permissions here.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="payslips" className="mt-4 space-y-4">
+                  <div className="flex justify-end">
+                    <PayslipUploadDialog />
+                  </div>
+                  <AdminPayslipsList />
+                </TabsContent>
+              </Tabs>
+            </TabsContent>
+          )}
         </Tabs>
       </main>
     </div>
