@@ -15,9 +15,10 @@ export function QRCodeDisplay({ type, id, name, trigger }: QRCodeDisplayProps) {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
+  const basename = "/tfsapp";
   const signOnUrl = type === "project"
-    ? `${window.location.origin}/project-sign?project=${id}`
-    : `${window.location.origin}/document-sign?doc=${id}`;
+    ? `${window.location.origin}${basename}/project-sign?project=${id}`
+    : `${window.location.origin}${basename}/document-sign?doc=${id}`;
 
   useEffect(() => {
     const generateQR = async () => {
