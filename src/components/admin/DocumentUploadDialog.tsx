@@ -48,15 +48,16 @@ interface UserAssignment {
 }
 
 interface DocumentUploadDialogProps {
-  projectId: string;
+  projectId?: string;
   trigger?: React.ReactNode;
 }
 
-export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialogProps) {
+export function DocumentUploadDialog({ projectId: initialProjectId, trigger }: DocumentUploadDialogProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId || "");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -64,6 +65,21 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
     requiresSignature: false,
   });
   const [userAssignments, setUserAssignments] = useState<UserAssignment[]>([]);
+
+  // Fetch all projects for selection
+  const { data: projects } = useQuery({
+    queryKey: ["projects-for-upload"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+    enabled: open,
+  });
 
   // Fetch all users for assignment
   const { data: allUsers } = useQuery({
@@ -101,11 +117,11 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
 
   const uploadMutation = useMutation({
     mutationFn: async () => {
-      if (!file || !user) throw new Error("Missing file or user");
+      if (!file || !user || !selectedProjectId) throw new Error("Missing required fields");
 
       // Upload file to storage
       const fileExt = file.name.split(".").pop();
-      const fileName = `${projectId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${selectedProjectId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("site-documents")
@@ -122,7 +138,7 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
       const { data: document, error: docError } = await supabase
         .from("site_documents")
         .insert({
-          project_id: projectId,
+          project_id: selectedProjectId,
           title: formData.title,
           description: formData.description || null,
           document_type: formData.documentType as DocumentType,
@@ -175,6 +191,7 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
       requiresSignature: false,
     });
     setUserAssignments([]);
+    if (!initialProjectId) setSelectedProjectId("");
   };
 
   const toggleUserSelection = (userId: string) => {
@@ -204,9 +221,10 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
   };
 
   const isValid =
-    file && formData.title && formData.documentType;
+    file && formData.title && formData.documentType && selectedProjectId;
 
   const selectedCount = userAssignments.filter((u) => u.selected).length;
+  const selectedProject = projects?.find(p => p.id === selectedProjectId);
 
   return (
     <Dialog
@@ -236,6 +254,23 @@ export function DocumentUploadDialog({ projectId, trigger }: DocumentUploadDialo
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 py-4 pr-2">
+          {/* Project Selection */}
+          <div className="space-y-2">
+            <Label>Project</Label>
+            <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a project" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects?.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* File Upload */}
           <div className="space-y-2">
             <Label>Document File</Label>
