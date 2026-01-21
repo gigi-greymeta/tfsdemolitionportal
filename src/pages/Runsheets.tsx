@@ -8,9 +8,26 @@ import { Button } from "@/components/ui/button";
 import { ClipboardList, Clock, Truck, Users, Plus, ArrowLeft } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { QuickProjectDialog } from "@/components/site-safety/QuickProjectDialog";
+import { UserPasswordDialog } from "@/components/admin/UserPasswordDialog";
 
 const Runsheets = () => {
   const { user, loading: authLoading } = useAuth();
+
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user!.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      return !!data;
+    },
+    enabled: !!user,
+  });
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["stats", user?.id],
@@ -119,13 +136,23 @@ const Runsheets = () => {
               </p>
             </div>
           </div>
-          <Link to="/new-entry" className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto h-12 sm:h-11 text-base touch-target">
-              <Plus className="h-5 w-5" />
-              New Entry
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <QuickProjectDialog />
+            <Link to="/new-entry" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto h-12 sm:h-11 text-base touch-target">
+                <Plus className="h-5 w-5" />
+                New Entry
+              </Button>
+            </Link>
+          </div>
         </div>
+        
+        {/* Admin Controls */}
+        {isAdmin && (
+          <div className="flex gap-2">
+            <UserPasswordDialog />
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
