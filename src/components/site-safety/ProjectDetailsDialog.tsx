@@ -13,11 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, CheckCircle2, Truck, AlertCircle } from "lucide-react";
+import { FileText, CheckCircle2, Truck, AlertCircle, PenLine } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentPDFDownload } from "./DocumentPDFDownload";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import { SignOnReportDownload } from "./SignOnReportDownload";
+import { SignaturePage } from "./SignaturePage";
 interface Project {
   id: string;
   name: string;
@@ -61,6 +62,15 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedAsset, setSelectedAsset] = useState<string>("");
+  const [signatureDocument, setSignatureDocument] = useState<{
+    id: string;
+    title: string;
+    description: string | null;
+    document_type: string;
+    version: string | null;
+    file_url: string | null;
+    projects: { id: string; name: string };
+  } | null>(null);
 
   const { data: documents, isLoading: docsLoading } = useQuery({
     queryKey: ["project-documents", project?.id],
@@ -126,33 +136,18 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
     enabled: !!project?.id && !!user,
   });
 
-  const signMutation = useMutation({
-    mutationFn: async (documentId: string) => {
-      const { error } = await supabase
-        .from("document_signatures")
-        .insert({
-          document_id: documentId,
-          user_id: user!.id,
-          signature_data: "signed", // In a real app, this would be actual signature data
-        });
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-signatures"] });
-      toast({
-        title: "Document Signed",
-        description: "You have successfully signed the document.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Signing Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const handleSignDocument = (doc: SiteDocument) => {
+    if (!project) return;
+    setSignatureDocument({
+      id: doc.id,
+      title: doc.title,
+      description: doc.description,
+      document_type: doc.document_type,
+      version: doc.version,
+      file_url: doc.file_url,
+      projects: { id: project.id, name: project.name },
+    });
+  };
 
   const updateAssetMutation = useMutation({
     mutationFn: async (assetId: string) => {
@@ -339,10 +334,9 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
                               <Button 
                                 size="sm" 
                                 variant="outline"
-                                onClick={() => signMutation.mutate(doc.id)}
-                                disabled={signMutation.isPending}
+                                onClick={() => handleSignDocument(doc)}
                               >
-                                <FileText className="h-3 w-3 mr-1" />
+                                <PenLine className="h-3 w-3 mr-1" />
                                 Sign
                               </Button>
                             )
@@ -357,6 +351,13 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
           </div>
         </div>
       </DialogContent>
+
+      {/* Signature Page Dialog */}
+      <SignaturePage
+        open={!!signatureDocument}
+        onOpenChange={(isOpen) => !isOpen && setSignatureDocument(null)}
+        document={signatureDocument}
+      />
     </Dialog>
   );
 }
