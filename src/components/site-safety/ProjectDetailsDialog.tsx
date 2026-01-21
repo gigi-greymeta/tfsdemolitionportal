@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, CheckCircle2, Truck, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { DocumentPDFDownload } from "./DocumentPDFDownload";
 
 interface Project {
   id: string;
@@ -23,6 +24,7 @@ interface Project {
   client_id: string | null;
   is_active: boolean;
   qr_code: string | null;
+  project_number: string | null;
   created_at: string;
 }
 
@@ -268,25 +270,36 @@ export function ProjectDetailsDialog({ project, open, onOpenChange }: ProjectDet
                           )}
                         </div>
                         
-                        {doc.requires_signature && (
-                          signed ? (
-                            <Badge variant="outline" className="bg-success/10 text-success border-success/30 flex-shrink-0">
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Signed
-                            </Badge>
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-shrink-0"
-                              onClick={() => signMutation.mutate(doc.id)}
-                              disabled={signMutation.isPending}
-                            >
-                              <FileText className="h-3 w-3 mr-1" />
-                              Sign
-                            </Button>
-                          )
-                        )}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <DocumentPDFDownload
+                            documentId={doc.id}
+                            documentTitle={doc.title}
+                            documentType={doc.document_type}
+                            version={doc.version}
+                            projectName={project?.name || "Unknown"}
+                            projectNumber={project?.project_number || null}
+                            description={doc.description}
+                            size="icon"
+                          />
+                          {doc.requires_signature && (
+                            signed ? (
+                              <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                                <CheckCircle2 className="h-3 w-3 mr-1" />
+                                Signed
+                              </Badge>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => signMutation.mutate(doc.id)}
+                                disabled={signMutation.isPending}
+                              >
+                                <FileText className="h-3 w-3 mr-1" />
+                                Sign
+                              </Button>
+                            )
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
